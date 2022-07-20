@@ -15,7 +15,8 @@
 struct list_head *q_new()
 {
     struct list_head *l = malloc(sizeof(struct list_head));
-    if (!l) return NULL;
+        if (!l)
+            return NULL;
     l->prev = NULL;
     l->next = NULL;
     return l;
