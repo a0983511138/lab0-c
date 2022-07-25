@@ -25,13 +25,12 @@ struct list_head *q_new()
 /* Free all storage used by queue */
 void q_free(struct list_head *l)
 {
-    do {
-        struct list_head *tmp = l;
+    struct list_head *start = l;
 
-        l = l->next ? l->next : l;
-        free(tmp);
-        ;
-    } while (l->next);
+    while (l != start) {
+        l = l->next;
+        list_del_init(l);
+    }
 }
 
 /* Insert an element at head of queue */
@@ -127,7 +126,17 @@ void q_swap(struct list_head *head)
 }
 
 /* Reverse elements in queue */
-void q_reverse(struct list_head *head) {}
+void q_reverse(struct list_head *head)
+{
+    struct list_head *start = head, *tmp;
+
+    do {
+        tmp = head->next;
+        head->next = head->prev;
+        head->prev = tmp;
+        head = head->next;
+    } while (head != start);
+}
 
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head) {}
