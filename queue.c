@@ -50,13 +50,15 @@ bool q_insert_head(struct list_head *head, char *s)
     if (!node)
         return false;
 
-    node->value = malloc(sizeof(char) * strlen(s));
+    int length = strlen(s);
+    node->value = malloc(sizeof(char) * (length + 1));
     if (!node->value) {
         free(node);
         return false;
     }
 
-    strncpy(node->value, s, strlen(s));
+    strncpy(node->value, s, length);
+    node->value[length] = '\0';
 
     list_add(&node->list, head);
 
@@ -73,13 +75,15 @@ bool q_insert_tail(struct list_head *head, char *s)
     if (!node)
         return false;
 
-    node->value = malloc(sizeof(char) * strlen(s));
+    int length = strlen(s);
+    node->value = malloc(sizeof(char) * (length + 1));
     if (!node->value) {
         free(node);
         return false;
     }
 
-    strncpy(node->value, s, strlen(s));
+    strncpy(node->value, s, length);
+    node->value[length] = '\0';
 
     list_add_tail(&node->list, head);
 
@@ -144,6 +148,11 @@ int q_size(struct list_head *head)
 // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
 bool q_delete_mid(struct list_head *head)
 {
+    if (!head)
+        return false;
+    if (head == head->next)
+        return true;
+
     struct list_head *prev, *next;
     prev = next = head;
 
