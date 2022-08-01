@@ -1,8 +1,7 @@
-#include <stdio.h>
+#include "queue.h"
 #include <stdlib.h>
 #include <string.h>
-
-#include "queue.h"
+#include "report.h"
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
@@ -90,13 +89,41 @@ bool q_insert_tail(struct list_head *head, char *s)
 /* Remove an element from head of queue */
 element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head)
+        return NULL;
+    if (head->next == head)
+        return NULL;
+
+    struct list_head *node = head->next;
+    element_t *item = list_entry(node, element_t, list);
+    int length = strlen(item->value);
+
+    list_del_init(node);
+
+    strncpy(sp, item->value, length);
+    sp[length] = '\0';
+
+    return item;
 }
 
 /* Remove an element from tail of queue */
 element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
 {
-    return NULL;
+    if (!head)
+        return NULL;
+    if (head->prev == head)
+        return NULL;
+
+    struct list_head *node = head->prev;
+    element_t *item = list_entry(node, element_t, list);
+    int length = strlen(item->value);
+
+    list_del_init(node);
+
+    strncpy(sp, item->value, length);
+    sp[length] = '\0';
+
+    return item;
 }
 
 /* Return number of elements in queue */
@@ -114,24 +141,37 @@ int q_size(struct list_head *head)
 }
 
 /* Delete the middle node in queue */
+// https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
 bool q_delete_mid(struct list_head *head)
 {
-    // https://leetcode.com/problems/delete-the-middle-node-of-a-linked-list/
+    struct list_head *prev, *next;
+    prev = next = head;
+
+    do {
+        next = next->next;
+        if (next == prev)
+            break;
+        prev = prev->prev;
+    } while (next != prev);
+
+    element_t *item = list_entry(next, element_t, list);
+    list_del(next);
+    free(item->value);
+    free(item);
+
     return true;
 }
 
 /* Delete all nodes that have duplicate string */
+// https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
 bool q_delete_dup(struct list_head *head)
 {
-    // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
     return true;
 }
 
 /* Swap every two adjacent nodes */
-void q_swap(struct list_head *head)
-{
-    // https://leetcode.com/problems/swap-nodes-in-pairs/
-}
+// https://leetcode.com/problems/swap-nodes-in-pairs/
+void q_swap(struct list_head *head) {}
 
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head)
