@@ -3,6 +3,8 @@
 #include <string.h>
 #include "report.h"
 
+void quick_sort(struct list_head *left, struct list_head *right);
+
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
  * following line.
@@ -153,18 +155,15 @@ bool q_delete_mid(struct list_head *head)
     if (head == head->next)
         return true;
 
-    struct list_head *prev, *next;
-    prev = next = head;
+    float len = (float) q_size(head) / 2;
 
-    do {
-        next = next->next;
-        if (next == prev)
-            break;
-        prev = prev->prev;
-    } while (next != prev);
+    while (len > 0) {
+        head = head->prev;
+        len--;
+    }
 
-    element_t *item = list_entry(next, element_t, list);
-    list_del(next);
+    element_t *item = list_entry(head, element_t, list);
+    list_del(head);
     free(item->value);
     free(item);
 
@@ -180,7 +179,22 @@ bool q_delete_dup(struct list_head *head)
 
 /* Swap every two adjacent nodes */
 // https://leetcode.com/problems/swap-nodes-in-pairs/
-void q_swap(struct list_head *head) {}
+void q_swap(struct list_head *head)
+{
+    if (!head)
+        return;
+
+    int len = q_size(head) / 2;
+
+    while (len > 0) {
+        struct list_head *node = head->next;
+        list_del(node);
+        head = head->next;
+        list_add(node, head);
+        head = head->next;
+        len--;
+    }
+}
 
 /* Reverse elements in queue */
 void q_reverse(struct list_head *head)
@@ -196,4 +210,38 @@ void q_reverse(struct list_head *head)
 }
 
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    quick_sort(head->next, head->prev);
+}
+
+void quick_sort(struct list_head *left, struct list_head *right)
+{
+    /*
+    element_t *lnode = list_entry(left , element_t, list);
+    element_t *rnode = list_entry(right, element_t, list);
+
+    char *key = malloc(sizeof(char) * strlen(lnode->value));
+    strncpy(key, lnode->value, strlen(lnode->value));
+
+    while(left != right) {
+        while(strcmp(key, lnode->value) <= 0 && left != right) {
+            left = left->next;
+            lnode = list_entry(left, element_t, list);
+        }
+        while(strcmp(key, rnode->value) > 0 && left != right) {
+            right = right->prev;
+            rnode = list_entry(right, element_t, list);
+        }
+        if (left != right) {
+            struct list_head *node = left->prev;
+            list_del(left);
+            list_add(left, right);
+            list_del(right);
+            list_add(right, node);
+        }
+    }
+
+    free(key);
+    */
+}
