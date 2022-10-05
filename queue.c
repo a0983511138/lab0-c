@@ -1,9 +1,10 @@
 #include "queue.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "report.h"
 
-void quick_sort(struct list_head *left, struct list_head *right);
+void merge_sort(struct list_head *left, struct list_head *right, int leno);
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
@@ -212,36 +213,100 @@ void q_reverse(struct list_head *head)
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head)
 {
-    quick_sort(head->next, head->prev);
+    if (!head)
+        return;
+
+    int i, len = q_size(head);
+    struct list_head *node_l = head->next, *node_r = head->next;
+
+    for (i = 0; i < len / 2; i++)
+        node_r = node_r->next;
+
+    head->prev->next = NULL;
+    head->prev = NULL;
+    head->next->prev = NULL;
+    head->next = NULL;
+    merge_sort(node_l, node_r, len);
+
+    while (node_l->prev)
+        node_l = node_l->prev;
+
+    head->next = node_l;
+    node_l->prev = head;
+
+    while (node_l->next) {
+        printf("%s ", list_entry(node_l, element_t, list)->value);
+        node_l = node_l->next;
+    }
+    printf("\n");
+    node_l->next = head;
+    head->prev = node_l;
 }
 
-void quick_sort(struct list_head *left, struct list_head *right)
+void merge_sort(struct list_head *left, struct list_head *right, int len)
 {
-    /*
-    element_t *lnode = list_entry(left , element_t, list);
-    element_t *rnode = list_entry(right, element_t, list);
+    printf("-----------------------\nlen: %d\n", len);
+    if (!left || !right || len <= 1)
+        return;
 
-    char *key = malloc(sizeof(char) * strlen(lnode->value));
-    strncpy(key, lnode->value, strlen(lnode->value));
+    struct list_head *node;
+    int triger = 0;
 
-    while(left != right) {
-        while(strcmp(key, lnode->value) <= 0 && left != right) {
-            left = left->next;
-            lnode = list_entry(left, element_t, list);
-        }
-        while(strcmp(key, rnode->value) > 0 && left != right) {
-            right = right->prev;
-            rnode = list_entry(right, element_t, list);
-        }
-        if (left != right) {
-            struct list_head *node = left->prev;
-            list_del(left);
-            list_add(left, right);
-            list_del(right);
-            list_add(right, node);
-        }
+    right->prev->next = NULL;
+    right->prev = NULL;
+
+    if (len > 2) {
+        node = left;
+        for (int i = 0; i < len / 4; i++)
+            node = node->next;
+        merge_sort(left, node, len / 2);
+
+        node = right;
+        for (int i = 0; i < (len / 2 + len % 2) / 2; i++)
+            node = node->next;
+        merge_sort(right, node, len / 2 + len % 2);
     }
 
-    free(key);
-    */
+    while (left->prev)
+        left = left->prev;
+    while (right->prev)
+        right = right->prev;
+
+    while (left != NULL && right != NULL) {
+        element_t *item1 = list_entry(left, element_t, list);
+        element_t *item2 = list_entry(right, element_t, list);
+
+        if (strcmp(item1->value, item2->value) > 0) {
+            printf("%s > %s\n", item1->value, item2->value);
+            node = right;
+            if (right->next) {
+                right = right->next;
+                right->prev = node->prev;
+            } else
+                triger = 1;
+            if (node->prev)
+                node->prev->next = right;
+
+            if (left->prev) {
+                left->prev->next = node;
+                node->prev = left->prev;
+            }
+            node->next = left;
+            left->prev = node;
+
+        } else {
+            printf("%s < %s\n", item1->value, item2->value);
+            if (left->next)
+                left = left->next;
+            else {
+                triger = 1;
+                left->next = right;
+                right->prev = left;
+            }
+        }
+        if (triger)
+            break;
+    }
+
+    printf("end of merge len: %d\n", len);
 }
